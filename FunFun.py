@@ -139,7 +139,6 @@ functions = read_csv('./data/kofam_ontology_NEW_DATA.csv', sep='\t', index_col=[
 
 # Make prediction and generating report file 
 
-make_report = lambda function: res_file.write('{}\t{}\n'.format(function, dict_of_methabolic_function[function]))
 metafunctional = []
 
 def make_fun_report(names):
@@ -150,6 +149,8 @@ def make_fun_report(names):
 
         dict_of_methabolic_function = get_functionality(fun, Distanece_DF, functions, n_neigbors=K, epsilon=e)
         metafunctional.append(list(dict_of_methabolic_function.values()))
+        # Function ...
+        make_report = lambda function: res_file.write('{}\t{}\n'.format(function, dict_of_methabolic_function[function]))
 
         with open('{}/Results_{}.tsv'.format(out, fun), 'w') as res_file:
 
@@ -166,8 +167,23 @@ function_list = make_fun_report(names)
 
 # Methafungal functional 
 metafunctional = np.array(metafunctional)
+metafunctional = np.mean(metafunctional, axis=0)
 
-np.mean(metafunctional, axis=0)
+def get_metafunctional(metafunctional, function_list):
+
+    with open('{}/Results_METAFUNCTIONAL.tsv'.format(out), 'w') as res_file:
+
+        for idx in range(function_list):
+
+            res_file.write('{}\t{}\n'.format(function_list[idx], metafunctional[idx]))
+
+    print('Methafunctional annotated')
+
+# Activate function 
+
+get_metafunctional(metafunctional, function_list)
+
+    
 
 
 print('Job is done!')
