@@ -2,7 +2,6 @@ import os
 import argparse
 from pandas import read_csv
 from pandas.core.dtypes.missing import na_value_for_dtype
-from src.model import get_functionality
 
 parser = argparse.ArgumentParser()
 
@@ -141,13 +140,22 @@ functions = read_csv('./data/kofam_ontology_NEW_DATA.csv', sep='\t', index_col=[
 
 metafunctional = []
 
-def make_fun_report(names):
+def get_functionality(fungi, dist_matrix, functions, n_neigbors, epsilont=0.5):
+    
+    vector_dist = dist_matrix.sort_values(fungi)[fungi]
+    neighbors = list(vector_dist[vector_dist <= epsilont][1: n_neigbors+1].keys())
+    neighbor_func_info = functions[neighbors].mean(axis=1)
+    dict_of_methabolic_function = dict(zip(neighbor_func_info.index, neighbor_func_info.values))
+    
+    return dict_of_methabolic_function
+
+def make_fun_report(names, Distanece_DF, functions, n_neigbors=K, epsilon=e):
     
     for fun in names:
 
         # Get FUNction for FUNgi
 
-        dict_of_methabolic_function = get_functionality(fun, Distanece_DF, functions, n_neigbors=K, epsilon=e)
+        dict_of_methabolic_function = get_functionality(fun, Distanece_DF, functions, n_neigbors, epsilon)
         metafunctional.append(list(dict_of_methabolic_function.values()))
         # Function ...
         make_report = lambda function: res_file.write('{}\t{}\n'.format(function, dict_of_methabolic_function[function]))
@@ -163,7 +171,7 @@ def make_fun_report(names):
 
 # Activate function
 
-function_list = make_fun_report(names)
+function_list = make_fun_report(names, Distanece_DF, functions, n_neigbors=K, epsilon=e)
 
 # Methafungal functional 
 metafunctional = np.array(metafunctional)
@@ -172,6 +180,8 @@ metafunctional = np.mean(metafunctional, axis=0)
 def get_metafunctional(metafunctional, function_list):
 
     with open('{}/Results_METAFUNCTIONAL.tsv'.format(out), 'w') as res_file:
+
+        res_file.write('Function\Share of functionality\n')
 
         for idx in range(function_list):
 
@@ -183,7 +193,38 @@ def get_metafunctional(metafunctional, function_list):
 
 get_metafunctional(metafunctional, function_list)
 
+# Lets characterize fungal community 
+taxon_DF = read_csv('./Taxonomy.tsv', sep='\t', index_col=[0])
+
+def get_taxonomy(fun, dist_mat, taxon_DF):
     
+
+    vector_dist= dist_mat.sort_values(fun)[fun]
+    neighbors = list(vector_dist[vector_dist < 0.5][1: 6].keys())
+    taxonomy = 'Uncharacterized fungi'
+    n_neighbor = 'Have no nearest neighbor with known taxonomy'
+
+    for neighbor in neighbors:
+        try:
+            n_neighbor = neighbor
+            taxonomy = taxon_DF.loc[neighbor]['Taxonomy']
+            break
+            
+        except:
+            continue
+            
+    return taxonomy, n_neighbor
+
+with open('{}/Taxonomy_report.txt'.format(out), 'w') as tax_report:
+
+    tax_report.write('Fungi\tNeares_neighbor\tTaxonomy\n')
+
+    for fun in names:
+        
+        taxonomy, n_neighbor = get_taxonomy(fun, Distanece_DF, taxon_DF)
+        tax_report.write('{}\t{}\n'.format(fun, n_neighbor, taxonomy))
+        
+
 
 
 print('Job is done!')
