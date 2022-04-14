@@ -1,230 +1,220 @@
 import os
+import sys
+import logging
 import argparse
-from pandas import read_csv
-from pandas.core.dtypes.missing import na_value_for_dtype
-
-parser = argparse.ArgumentParser()
-
-group1 = parser.add_argument_group("Base arguments")
-group2 = parser.add_argument_group("Algorithm Parameter")
-# If ypu want to find its inner genome
-group1.add_argument('-ITS1', # Should be concatinate file
-                    type=str,
-                    default=None,
-                    help='Sequence of ITS1 in fasta format.')
-group1.add_argument('-ITS2', 
-                    type=str,
-                    default=None,
-                    help='Sequence of ITS2 in fasta format.')
-group1.add_argument('-CONCAT', 
-                    type=str,
-                    default=None,
-                    help='Sequence of ITS1, 5.8rRNA, ITS2 in fasta format.')
-group2.add_argument('-K', 
-                    type=str,
-                    default=10,
-                    help='K nearest neighbors.')
-group2.add_argument('-e', 
-                    type=str,
-                    default=0.5,
-                    help='Epsilon distance for nearest neighbor. ε ⊆ [0; 1]')
-group1.add_argument('-out', 
-                    type=str,
-                    default='./FunFun_output',
-                    help='Get output of your file.')
-args = parser.parse_args()
-
-# Get arguments
-ITS1 = args.ITS1
-ITS2 = args.ITS2
-CONCAT = args.CONCAT
-K = args.K
-e = args.e
-out = args.out
-# Making directory
-try:
-
-    os.mkdir(out)
-
-except:
-
-    print('Directory is exist!')
-
-# Fasta availability check
-if  ITS1 is None and ITS2 is None and CONCAT is None:
-
-    print('Give an ITS!')
-    import sys
-    sys.exit()
-
+import shutil
+import numpy as np
+from pandas import read_csv, DataFrame
 from Bio.SeqIO import parse
+from itertools import product 
+from subprocess import call
+from scipy.spatial.distance import pdist, squareform
+import plotly.express as px
+#from pandas.core.dtypes.missing import na_value_for_dtype
 
-def get_names(ITS_fasta):
+def main():
+    
+    parser = argparse.ArgumentParser()
+    group1 = parser.add_argument_group("Base arguments")
+    group2 = parser.add_argument_group("Algorithm Parameter")
 
-    names = []
+    group1.add_argument('-ITS1', # Should be concatinate file
+                        type=str,
+                        default=None,
+                        help='Sequence of ITS1 in fasta format.')
+    group1.add_argument('-ITS2', 
+                        type=str,
+                        default=None,
+                        help='Sequence of ITS2 in fasta format.')
+    group1.add_argument('-CONCAT', 
+                        type=str,
+                        default=None,
+                        help='Sequence of ITS1, 5.8rRNA, ITS2 in fasta format.')
+    group2.add_argument('-K', 
+                        type=str,
+                        default=10,
+                        help='K nearest neighbors.')
+    group2.add_argument('-e', 
+                        type=str,
+                        default=0.5,
+                        help='Epsilon distance for nearest neighbor. ε ⊆ [0; 1]')
+    group1.add_argument('-out', 
+                        type=str,
+                        default='./FunFun_output',
+                        help='Get output of your file.')
+    import sys
+    if len(sys.argv)==1:
 
-    with parse(ITS_fasta, 'fasta') as fasta:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args()
+
+    # Get arguments
+    ITS1 = args.ITS1
+    ITS2 = args.ITS2
+    CONCAT = args.CONCAT
+    K = args.K
+    e = args.e
+    out = args.out
+    functionality = read_csv('./data/functionality.tsv', sep='\t', index_col=[0])
+    # Making directory
+    a_logger = logging.getLogger()
+    a_logger.setLevel(logging.DEBUG)
+
+    if out is None:
+        
+        out = './FunFun_output'
+        
+    if os.path.exists(out):
+
+        shutil.rmtree(out)
+    
+    os.mkdir(out)
+    
+    output_file_handler = logging.FileHandler(f"{out}/FunFun.log")
+    stdout_handler = logging.StreamHandler(sys.stdout)
+
+    # Fasta availability check
+    if  ITS1 is None and ITS2 is None and CONCAT is None:
+
+        a_logger.debug('Give an ITS!')
+        sys.exit()
+
+    def get_names(ITS_fasta):
+
+        names = []
+
+        fasta = parse(ITS_fasta, 'fasta')
+
         for line in fasta:
 
             names.append(line.id)
 
-    return names
+        return names
 
-names = get_names(ITS1)
+    # Make realignment on base
 
-# Make realignment on base
-from subprocess import call
+    if ITS1 is not None:
 
-if ITS1 is not None:
-
-    call('muscul -profile -in1 ./data/all_ITS1.msa -in2 {} -clwstrictout ./{}/realigned_{}.clw'.format(ITS1, out, ITS1[: -3]), shell=True)
-    # Get distance matrix 
-    call('clustalo --p1 ./{}/realigned_{}.clw --distmat-out=ITS1_dist_mat.txt --full --force'.format(ITS1[: -3]))
-
-if ITS2 is not None:
-    
-    call('muscul -profile -in1 ./data/all_ITS2.msa -in2 {} -clwstrictout ./{}/realigned_{}.clw'.format(ITS2, out, ITS1[: -3]), shell=True)
-    call('clustalo --p1 ./{}/realigned_{}.clw --distmat-out=ITS2_dist_mat.txt --full --force'.format(ITS1[: -3]))
-
-if CONCAT is not None:
-    
-    call('muscul -profile -in1 ./data/all_CONCAT.msa -in2 {} -clwstrictout ./{}/realigned_{}.clw'.format(CONCAT, out, ITS1[: -3]), shell=True)
-    call('clustalo --p1 ./{}/realigned_{}.clw --distmat-out=CONCAT_Kimura_dist_mat.txt --full --force'.format(ITS1[: -3]))
-
-# Parsing matrix
-
-from pandas import DataFrame
-import numpy as np
-
-realigned_seq = './{}/realigned_{}.clw'.format(out, ITS1[: -3])
-
-def get_matrix(realigned_seq):
-
-    identity_persent = []
-    columns = []
-    dist_matrix = read_csv(realigned_seq, sep='\t', comment='#', header=None)
-
-    for i in dist_matrix.index:
-        try:
-            if len(dist_matrix.iloc[i].values[0].split()) == 1:
-                continue
-
-            identity_persent.append(np.array(eval(', '.join(dist_matrix.iloc[i].values[0].split()[1:]))))
-            columns.append('_'.join(dist_matrix.iloc[i].values[0].split()[0].split('_')[1:4]).replace('\n', ''))
-            
-        except:
-            continue
-
-    identity_persent = np.array(identity_persent)
-    data_dict = {}
-
-    for i in range(len(identity_persent)):
-        for j in range(len(identity_persent[i])):
-            
-            if columns[i] not in  data_dict:
-                
-                data_dict[columns[i]]= {}
-                
-            data_dict[columns[i]][columns[j]] = identity_persent[i][j]
-            
-    Distanece_DF = DataFrame(data=data_dict)
-
-    return Distanece_DF
-
-Distanece_DF = get_matrix(realigned_seq)
-# Importing functions data
-
-functions = read_csv('./data/kofam_ontology_NEW_DATA.csv', sep='\t', index_col=[0])
-
-# Make prediction and generating report file 
-
-metafunctional = []
-
-def get_functionality(fungi, dist_matrix, functions, n_neigbors, epsilont=0.5):
-    
-    vector_dist = dist_matrix.sort_values(fungi)[fungi]
-    neighbors = list(vector_dist[vector_dist <= epsilont][1: n_neigbors+1].keys())
-    neighbor_func_info = functions[neighbors].mean(axis=1)
-    dict_of_methabolic_function = dict(zip(neighbor_func_info.index, neighbor_func_info.values))
-    
-    return dict_of_methabolic_function
-
-def make_fun_report(names, Distanece_DF, functions, n_neigbors=K, epsilon=e):
-    
-    for fun in names:
-
-        # Get FUNction for FUNgi
-
-        dict_of_methabolic_function = get_functionality(fun, Distanece_DF, functions, n_neigbors, epsilon)
-        metafunctional.append(list(dict_of_methabolic_function.values()))
-        # Function ...
-        make_report = lambda function: res_file.write('{}\t{}\n'.format(function, dict_of_methabolic_function[function]))
-
-        with open('{}/Results_{}.tsv'.format(out, fun), 'w') as res_file:
-
-            res_file.write('KEGG function\tShare of all functions\n')        
-            list(map(make_report, list(dict_of_methabolic_function.keys())))
-    
-    function_list = list(dict_of_methabolic_function.keys())
-
-    return function_list
-
-# Activate function
-
-function_list = make_fun_report(names, Distanece_DF, functions, n_neigbors=K, epsilon=e)
-
-# Methafungal functional 
-metafunctional = np.array(metafunctional)
-metafunctional = np.mean(metafunctional, axis=0)
-
-def get_metafunctional(metafunctional, function_list):
-
-    with open('{}/Results_METAFUNCTIONAL.tsv'.format(out), 'w') as res_file:
-
-        res_file.write('Function\Share of functionality\n')
-
-        for idx in range(function_list):
-
-            res_file.write('{}\t{}\n'.format(function_list[idx], metafunctional[idx]))
-
-    print('Methafunctional annotated')
-
-# Activate function 
-
-get_metafunctional(metafunctional, function_list)
-
-# Lets characterize fungal community 
-taxon_DF = read_csv('./Taxonomy.tsv', sep='\t', index_col=[0])
-
-def get_taxonomy(fun, dist_mat, taxon_DF):
-    
-
-    vector_dist= dist_mat.sort_values(fun)[fun]
-    neighbors = list(vector_dist[vector_dist < 0.5][1: 6].keys())
-    taxonomy = 'Uncharacterized fungi'
-    n_neighbor = 'Have no nearest neighbor with known taxonomy'
-
-    for neighbor in neighbors:
-        try:
-            n_neighbor = neighbor
-            taxonomy = taxon_DF.loc[neighbor]['Taxonomy']
-            break
-            
-        except:
-            continue
-            
-    return taxonomy, n_neighbor
-
-with open('{}/Taxonomy_report.txt'.format(out), 'w') as tax_report:
-
-    tax_report.write('Fungi\tNeares_neighbor\tTaxonomy\n')
-
-    for fun in names:
+        base = read_csv('./data/ITS1_base.tsv', sep='\t', index_col=[0])
+        marker_seq = ITS1
+    if ITS2 is not None:
         
-        taxonomy, n_neighbor = get_taxonomy(fun, Distanece_DF, taxon_DF)
-        tax_report.write('{}\t{}\n'.format(fun, n_neighbor, taxonomy))
+        base = read_csv('./data/ITS2_base.tsv', sep='\t', index_col=[0])
+        marker_seq = ITS2
+
+    if CONCAT is not None:
         
+        base = read_csv('./data/CONCAT_base.tsv', sep='\t', index_col=[0])
+        marker_seq = CONCAT
+    # Parsing matrix
 
+    def normalize(kmers):
+        
+        norm = sum(list(kmers.values()))
+        
+        for kmer in kmers.keys():
+            
+            kmers[kmer] = kmers[kmer]/ norm
+        
+        return kmers
 
+    print('uibibui')
+    def get_kmers_fereq(seq, k=2):
+        
+        kmers = {"".join(kmer) : 0 for kmer in list(product("AGTC", repeat=k))}
+        
+        step = 1
+        start = 0
+        end = k
+        cken = []
+        while end != len(seq) - 1:
+            
+            kmers[str(seq[start: end])] += 1
+            start, end = start + step, end + step
+            
+        step = 1
+        start = 0
+        end = k
 
-print('Job is done!')
+        while end != len(seq.reverse_complement()) - 1:
+            
+            kmers[str(seq.reverse_complement()[start: end])] += 1        
+            start, end = start + step, end + step
+            
+        kmers = normalize(kmers)
+        
+        return kmers
+
+    def get_functionality(fungi, matrix_possitions, kofam_ontology, n_neigbors, epsilont=0.5):
+
+        neighbor = matrix_possitions.loc[fungi].sort_values()
+        neighbor = neighbor.drop(fungi)
+        neighbor = neighbor[neighbor <= epsilont]
+
+        if len(neighbor) > n_neigbors:
+            
+            neighbor = neighbor[: n_neigbors]
+            
+        if len(neighbor[neighbor == 0].index) > 0:
+            
+            dict_of_methabolic_function = kofam_ontology[neighbor[neighbor == 0].index].mean(axis=1)
+            
+        else:
+            
+            dict_of_methabolic_function = kofam_ontology[neighbor.index].mean(axis=1)
+
+        return dict_of_methabolic_function
+
+    def get_functionality(fungi, matrix_possitions, kofam_ontology, n_neigbors, epsilont=0.5):
+
+        neighbor = matrix_possitions.loc[fungi].sort_values()
+        neighbor = neighbor.drop(fungi)
+        neighbor = neighbor[neighbor <= epsilont]
+
+        if len(neighbor) > n_neigbors:
+            
+            neighbor = neighbor[: n_neigbors]
+            
+        if len(neighbor[neighbor == 0].index) > 0:
+            
+            dict_of_methabolic_function = kofam_ontology[neighbor[neighbor == 0].index].mean(axis=1)
+            
+        else:
+            
+            dict_of_methabolic_function = kofam_ontology[neighbor.index].mean(axis=1)
+
+        return dict_of_methabolic_function
+
+    Meta_micom = {}
+    marker_seq = parse(marker_seq, 'fasta')
+    c = 0
+
+    for its in marker_seq:
+
+        print(f'Processing {c}', end='')
+        fungi_sample = its.id
+        marker_frequence = get_kmers_fereq(its.seq, k=5)
+        marker_frequence['Fungi'] = fungi_sample
+        base_subset= base.append(DataFrame(data=marker_frequence, index=[fungi_sample])[base.columns])
+        distance_matrix = squareform(pdist(base_subset.values, 'cosine'))
+        distance_matrix = DataFrame(data=distance_matrix, index=base_subset.index, columns=base_subset.index)
+        its_function = get_functionality(fungi_sample, distance_matrix, functionality, n_neigbors=K, epsilont=e)
+        
+        if "Ortology group" not in Meta_micom:
+
+            Meta_micom["Ortology group"] = list(its_function.keys())
+        
+        Meta_micom[f'Fraction score {fungi_sample}'] = its_function.values
+        print('\r', end='')
+
+    Meta_micom = DataFrame(Meta_micom)
+    print(Meta_micom.T)
+    fig = px.bar(Meta_micom.T, y="Ortology group", x=Meta_micom.columns[1: ], width=1500, height=1000)
+    fig.write_html(f"{out}/Functional_barplot.html")
+    Meta_micom.to_csv(f'{out}/Results.tsv', sep='\t', index=False)
+    a_logger.debug('Job is done!')
+
+if __name__ == "__main__":
+    main()
