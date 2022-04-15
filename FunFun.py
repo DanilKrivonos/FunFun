@@ -211,8 +211,6 @@ def main():
         marker_seq = CONCAT
     # Parsing matrix
 
-
-
     a_logger.debug('Calculation functionality ...')
     marker_seq = parse(marker_seq, 'fasta')
     Meta_micom = {}
@@ -234,7 +232,7 @@ def main():
     Meta_micom = Meta_micom.assign(m=Meta_micom.mean(axis=1)).sort_values('m').drop('m', axis=1)
     fig = px.bar(Meta_micom.T, x=Meta_micom.columns, y=Meta_micom.index, width=1500, height=1000)
     fig.write_html(f"{out}/Functional_community.html")
-    Meta_micom.to_csv(f'{out}/Results.tsv', sep='\t', index=False)
+    Meta_micom.to_csv(f'{out}/Results.tsv', sep='\t')
     a_logger.debug('Job is done!')
 
 if __name__ == "__main__":
