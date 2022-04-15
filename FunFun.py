@@ -1,4 +1,5 @@
 import os
+from re import X
 import sys
 import logging
 import argparse
@@ -10,6 +11,7 @@ from itertools import product
 from subprocess import call
 from scipy.spatial.distance import pdist, squareform
 import plotly.express as px
+
 #from pandas.core.dtypes.missing import na_value_for_dtype
 
 def main():
@@ -42,12 +44,11 @@ def main():
                         type=str,
                         default='./FunFun_output',
                         help='Get output of your file.')
-    import sys
     if len(sys.argv)==1:
 
         parser.print_help(sys.stderr)
         sys.exit(1)
-
+    
     args = parser.parse_args()
 
     # Get arguments
@@ -62,56 +63,10 @@ def main():
     a_logger = logging.getLogger()
     a_logger.setLevel(logging.DEBUG)
 
-    if out is None:
-        
-        out = './FunFun_output'
-        
-    if os.path.exists(out):
-
-        shutil.rmtree(out)
-    
-    os.mkdir(out)
-    
-    output_file_handler = logging.FileHandler(f"{out}/FunFun.log")
-    stdout_handler = logging.StreamHandler(sys.stdout)
-
-    # Fasta availability check
-    if  ITS1 is None and ITS2 is None and CONCAT is None:
-
-        a_logger.debug('Give an ITS!')
-        sys.exit()
-
-    def get_names(ITS_fasta):
-
-        names = []
-
-        fasta = parse(ITS_fasta, 'fasta')
-
-        for line in fasta:
-
-            names.append(line.id)
-
-        return names
-
-    # Make realignment on base
-
-    if ITS1 is not None:
-
-        base = read_csv('./data/ITS1_base.tsv', sep='\t', index_col=[0])
-        marker_seq = ITS1
-    if ITS2 is not None:
-        
-        base = read_csv('./data/ITS2_base.tsv', sep='\t', index_col=[0])
-        marker_seq = ITS2
-
-    if CONCAT is not None:
-        
-        base = read_csv('./data/CONCAT_base.tsv', sep='\t', index_col=[0])
-        marker_seq = CONCAT
-    # Parsing matrix
-
     def normalize(kmers):
+        """
         
+        """
         norm = sum(list(kmers.values()))
         
         for kmer in kmers.keys():
@@ -120,9 +75,10 @@ def main():
         
         return kmers
 
-    print('uibibui')
     def get_kmers_fereq(seq, k=2):
+        """"
         
+        """
         kmers = {"".join(kmer) : 0 for kmer in list(product("AGTC", repeat=k))}
         
         step = 1
@@ -148,7 +104,9 @@ def main():
         return kmers
 
     def get_functionality(fungi, matrix_possitions, kofam_ontology, n_neigbors, epsilont=0.5):
-
+        """
+        
+        """
         neighbor = matrix_possitions.loc[fungi].sort_values()
         neighbor = neighbor.drop(fungi)
         neighbor = neighbor[neighbor <= epsilont]
@@ -168,7 +126,9 @@ def main():
         return dict_of_methabolic_function
 
     def get_functionality(fungi, matrix_possitions, kofam_ontology, n_neigbors, epsilont=0.5):
-
+        """
+        
+        """
         neighbor = matrix_possitions.loc[fungi].sort_values()
         neighbor = neighbor.drop(fungi)
         neighbor = neighbor[neighbor <= epsilont]
@@ -186,14 +146,11 @@ def main():
             dict_of_methabolic_function = kofam_ontology[neighbor.index].mean(axis=1)
 
         return dict_of_methabolic_function
-
-    Meta_micom = {}
-    marker_seq = parse(marker_seq, 'fasta')
-    c = 0
-
-    for its in marker_seq:
-
-        print(f'Processing {c}', end='')
+    
+    def get_matrix(its, *args):
+        """
+        """
+        Ortology_group, Meta_micom, non_pred = args
         fungi_sample = its.id
         marker_frequence = get_kmers_fereq(its.seq, k=5)
         marker_frequence['Fungi'] = fungi_sample
@@ -202,17 +159,81 @@ def main():
         distance_matrix = DataFrame(data=distance_matrix, index=base_subset.index, columns=base_subset.index)
         its_function = get_functionality(fungi_sample, distance_matrix, functionality, n_neigbors=K, epsilont=e)
         
-        if "Ortology group" not in Meta_micom:
+        if Ortology_group == []:
 
-            Meta_micom["Ortology group"] = list(its_function.keys())
+            Ortology_group = list(its_function.keys())
+            
+        predicted_vector = its_function.values
+
+        if str(predicted_vector[0]) == 'nan':
+
+            a_logger.debug(f'Functional for {its.id} was not predicted!\nTry to change -e ...')    
+            non_pred += 1
+
+        Meta_micom[f'Fraction score {fungi_sample}'] = predicted_vector
+
+        return Ortology_group, Meta_micom, non_pred
+
+    # Start assay
+    if out is None:
         
-        Meta_micom[f'Fraction score {fungi_sample}'] = its_function.values
-        print('\r', end='')
+        out = './FunFun_output'
+        
+    if os.path.exists(out):
 
-    Meta_micom = DataFrame(Meta_micom)
-    print(Meta_micom.T)
-    fig = px.bar(Meta_micom.T, y="Ortology group", x=Meta_micom.columns[1: ], width=1500, height=1000)
-    fig.write_html(f"{out}/Functional_barplot.html")
+        shutil.rmtree(out)
+    
+    os.mkdir(out)
+    
+    output_file_handler = logging.FileHandler(f"{out}/FunFun.log")
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    
+    # Fasta availability check
+    if  ITS1 is None and ITS2 is None and CONCAT is None:
+
+        a_logger.debug('Give an ITS!')
+        sys.exit()
+
+    # Make realignment on base
+    if ITS1 is not None:
+
+        base = read_csv('./data/ITS1_base.tsv', sep='\t', index_col=[0])
+        marker_seq = ITS1
+
+    if ITS2 is not None:
+        
+        base = read_csv('./data/ITS2_base.tsv', sep='\t', index_col=[0])
+        marker_seq = ITS2
+
+    if CONCAT is not None:
+        
+        base = read_csv('./data/CONCAT_base.tsv', sep='\t', index_col=[0])
+        marker_seq = CONCAT
+    # Parsing matrix
+
+
+
+    a_logger.debug('Calculation functionality ...')
+    marker_seq = parse(marker_seq, 'fasta')
+    Meta_micom = {}
+    non_pred = 0
+    c = 0
+    Ortology_group = []
+
+    for its in marker_seq:
+
+        print(f'Processing {c}', end='')
+        Ortology_group, Meta_micom, non_pred = get_matrix(its, Ortology_group, Meta_micom, non_pred)
+        print('\r', end='')
+        c += 1
+
+    predicted_persentage = (c-non_pred/c) * 100
+    a_logger.debug(f'Functional was predicted for {predicted_persentage} of all fungies.')
+    # Generation output 
+    Meta_micom = DataFrame(Meta_micom, index=Ortology_group)
+    Meta_micom = Meta_micom.assign(m=Meta_micom.mean(axis=1)).sort_values('m').drop('m', axis=1)
+    fig = px.bar(Meta_micom.T, x=Meta_micom.columns, y=Meta_micom.index, width=1500, height=1000)
+    fig.write_html(f"{out}/Functional_community.html")
     Meta_micom.to_csv(f'{out}/Results.tsv', sep='\t', index=False)
     a_logger.debug('Job is done!')
 
