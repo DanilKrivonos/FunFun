@@ -2,7 +2,7 @@ FunFun is the instrument allows us to evaluate the functional content of an indi
 ## **Dependencies:**
 - numpy
 - pandas
-- biopython
+- biopython=1.77
 - plotly
 ## **Installation:**
 
