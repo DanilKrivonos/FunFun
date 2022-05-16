@@ -3,7 +3,7 @@ import numpy as np
 from pandas import DataFrame
 from itertools import product 
 from scipy.spatial.distance import cosine
-from src.Get_functional import get_functionality
+from FunFun.src.Get_functional import get_functionality
 
 a_logger = logging.getLogger()
 a_logger.setLevel(logging.DEBUG)

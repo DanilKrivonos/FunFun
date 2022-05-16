@@ -6,7 +6,7 @@ import shutil
 import warnings
 import numpy as np 
 import plotly.express as px
-from src.Get_distance import get_matrix
+from FunFun.src.Get_distance import get_matrix
 from pandas import read_csv, DataFrame
 from Bio.SeqIO import parse
 from subprocess import call
