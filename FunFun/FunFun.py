@@ -19,7 +19,7 @@ def main():
     group1 = parser.add_argument_group("Base arguments")
     group2 = parser.add_argument_group("Algorithm Parameter")
 
-    group1.add_argument('-ITS', # Should be concatinate file
+    group1.add_argument('-its', # Should be concatinate file
                         type=str,
                         default=None,
                         help='Sequence of ITS1 in fasta format.')
@@ -48,7 +48,7 @@ def main():
     args = parser.parse_args()
 
     # Get arguments
-    ITS = args.ITS
+    ITS = args.its
     TYPE = args.type.upper()
     K = args.K
     e = args.e
