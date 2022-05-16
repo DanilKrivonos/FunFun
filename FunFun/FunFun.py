@@ -96,7 +96,9 @@ def main():
     a_logger.debug(f'Functional was predicted for {predicted_persentage}% of all fungies.')
     
     # Generation output 
-    Meta_micom = DataFrame(Meta_micom, index=Ortology_group)
+    INDEX = ['Function']
+    INDEX.extend(Ortology_group)
+    Meta_micom = DataFrame(Meta_micom, index=INDEX)
     Meta_micom = Meta_micom.assign(m=Meta_micom.mean(axis=1)).sort_values('m').drop('m', axis=1)
     fig = px.bar(Meta_micom.T, x=Meta_micom.columns, y=Meta_micom.index, width=1500, height=1000)
     fig.write_html(f"{out}/Functional_community.html")
