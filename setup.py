@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="FunFun",
-    version="0.1.0",
+    version="0.1.3",
     author="D.V. Krivonos, D.N. Konanov",
     author_email="danil01060106@gmail.com",
     description="ITS-based functional annotator",
@@ -15,6 +15,12 @@ setuptools.setup(
     project_urls={
         "Bug Tracker": "https://github.com/DanilKrivonos/FunFun",
     },
+    package_data={
+        'mypackage': ['FunFun/data/CONCATENATE_base.tsv'],
+	'mypackage': ['FunFun/data/functionality.tsv'],
+	'mypackage': ['FunFun/data/ITS1_base.tsv'],
+	'mypackage': ['FunFun/data/ITS2_base.tsv'],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -22,7 +28,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     include_package_data=True,
-    packages=['FunFun.py', 'FunFun.src', 'FunFun.external', 'FunFun.data'],
+    packages=['FunFun', 'FunFun.src', 'FunFun.example', 'FunFun.data'],
     install_requires=[
         'numpy',
         'biopython',
