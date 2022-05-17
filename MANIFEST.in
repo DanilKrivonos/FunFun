@@ -1,1 +1,2 @@
 include FunFun/data/*
+include FunFun/example/*

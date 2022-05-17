@@ -113,7 +113,7 @@ def get_matrix(its, *args):
             a_logger.debug(f'Functional for {its.id} was not predicted!\nTry to change -e ...')    
             non_pred += 1
 
-        Meta_micom[f'Fraction score {fungi_sample}'] = predicted_vector
+        Meta_micom[fungi_sample] = predicted_vector
     except:
 
         a_logger.debug(f'Fuctional for {fungi_sample} was not predicted! Try to change e and K params.')
