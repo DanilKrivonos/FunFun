@@ -31,7 +31,7 @@ In the result of FunFun you take comfortable bar plot:
 
 <img src="https://user-images.githubusercontent.com/53526550/177160923-3398cea1-e79e-437d-9bc6-f1cff585588f.png" width="1000" height="600" align="left">
 
-### Parameters
+## Parameters
 ```
 usage: FunFun.py [-h] [-ITS ITS] [-type TYPE] [-out OUT] [-K K] [-e E]
 
