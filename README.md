@@ -27,7 +27,8 @@ FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+I
 ```
 funfun -ITS example/its2.fasta -type its2
 ```
-In the result of FunFun you take bar plot 
+In the result of FunFun you take comfortable bar plot:
+
 <img src="https://user-images.githubusercontent.com/53526550/177160923-3398cea1-e79e-437d-9bc6-f1cff585588f.png" width="1000" height="650" align="left">
 
 ### Parameters
