@@ -1,4 +1,5 @@
-FunFun is the instrument allows us to evaluate the functional content of an individual fungus or mycobiome in an automated mode based on ITS-amplicon sequencing data.
+FunFun is the instrument allows us to evaluate the functional content of an individual fungus or mycobiome in an automated mode based on ITS-amplicon sequencing data.![FunFun_logo_V3](https://user-images.githubusercontent.com/53526550/177148293-b9f7566b-5d2a-477d-a2c2-e0b8d690807b.png)
+
 ## **Dependencies:**
 - numpy
 - pandas
