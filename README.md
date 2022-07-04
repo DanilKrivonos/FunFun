@@ -1,23 +1,28 @@
-FunFun (Fungal Functional predictor)is the instrument allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
+# FunFun: ITS based gene content predictor tool
 <img src="https://user-images.githubusercontent.com/53526550/177148554-e6db1eab-e4e2-4e44-90a0-66f3ba8fbb47.png" width="200" height="280" align="left">
+FunFun (Fungal Functional predictor)is the instrument allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
+
 ## **Dependencies:**
 - numpy
-- tqdm
 - pandas
 - biopython=1.77
 - plotly
 - scipy
 ## **Installation:**
-
+FunFun can be installed via pip:
 ```
 conda create -n funfun_env -c bioconda
 conda activate funfun_env
 pip install funfun
 ```
-
+Or you can clone git repository:
+```
+git clone https://github.com/DanilKrivonos/FunFun
+python funfun --help
+```
 ## **Ussages example:**
 
-FunFun use three different types of ITS region input: ITS1, ITS2 and 18S+ITS1+5.8S+ITS2+28S (Full size ITS cluster). Also you can change model parameters: K neighbours and ε neighborhood limit. The output file is tsv tabl, when first column is orthology group and second is representation.
+FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Full size ITS cluster). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is orthology group and second is representation.
 
 ```
 funfun -ITS example/its2.fasta -type its2
