@@ -1,6 +1,6 @@
 # FunFun: ITS based gene content predictor tool
 <img src="https://user-images.githubusercontent.com/53526550/177148554-e6db1eab-e4e2-4e44-90a0-66f3ba8fbb47.png" width="200" height="280" align="left">
-FunFun (Fungal Functional predictor)is the instrument allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
+FunFun (Fungal Functional predictor) is the tool allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
 
 ## **Dependencies:**
 - numpy
@@ -27,6 +27,9 @@ FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+I
 ```
 funfun -ITS example/its2.fasta -type its2
 ```
+In the result of FunFun you take bar plot 
+<img src="https://user-images.githubusercontent.com/53526550/177160923-3398cea1-e79e-437d-9bc6-f1cff585588f.png" width="1000" height="650" align="left">
+
 ### Parameters
 ```
 usage: FunFun.py [-h] [-ITS ITS] [-type TYPE] [-out OUT] [-K K] [-e E]
