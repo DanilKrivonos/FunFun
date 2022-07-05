@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="FunFun",
-    version="0.1.14",
+    version="0.1.15",
     author="D.V. Krivonos, D.N. Konanov",
     author_email="danil01060106@gmail.com",
     description="ITS-based functional annotator",
