@@ -29,7 +29,7 @@ funfun -ITS example/its2.fasta -type its2
 ```
 In the result of FunFun you take comfortable bar plot:
 
-<img src="https://user-images.githubusercontent.com/53526550/177323788-25f86cf3-9922-4ea8-8777-98a9d99a0701.png" width="1000" height="600" align="left">
+<img src="/FunFun/example/Functional_community.html" width="1000" height="600" align="left">
 
 ## Parameters
 ```
