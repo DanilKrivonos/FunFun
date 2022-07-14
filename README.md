@@ -1,5 +1,5 @@
 # FunFun: ITS based gene content predictor tool
-<img src="https://user-images.githubusercontent.com/53526550/177148554-e6db1eab-e4e2-4e44-90a0-66f3ba8fbb47.png" width="200" height="280" align="left">
+<img src="https://user-images.githubusercontent.com/53526550/179017255-7efbfcb2-cee6-427a-9d43-0e2a570b2d45.png" width="200" height="280" align="left">
 FunFun (Fungal Functional predictor) is the tool allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
 
 ## **Dependencies:**
