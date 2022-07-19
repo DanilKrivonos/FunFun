@@ -22,7 +22,7 @@ python funfun --help
 ```
 ## **Ussages example:**
 
-FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Full size ITS cluster). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is orthology group and second is representation.
+FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Full size ITS cluster). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is KEGG orthology group and subsequent correspond to predicted gene content vectors.
 
 ```
 funfun -ITS example/its2.fasta -type its2
