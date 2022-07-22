@@ -30,7 +30,7 @@ def main():
     group1.add_argument('-out', 
                         type=str,
                         default='./FunFun_output',
-                        help='Get output of your file.')
+                        help='Output directory (default ./FunFun_output)')
 
     group2.add_argument('-K', 
                         type=int,
