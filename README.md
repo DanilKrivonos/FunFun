@@ -41,7 +41,7 @@ optional arguments:
 Base arguments:
   -ITS ITS    Sequences of ITS in fasta format.
   -type TYPE  Type of its region: its1, its2, concatenate.
-  -out OUT    Get output of your file.
+  -out OUT   Output directory (default ./FunFun_output)
 
 Algorithm Parameter:
   -K K        K nearest neighbors. Default k=10.
