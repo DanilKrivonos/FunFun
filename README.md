@@ -39,7 +39,7 @@ optional arguments:
   -h, --help  show this help message and exit
 
 Base arguments:
-  -ITS ITS    Sequence of ITS in fasta format.
+  -ITS ITS    Sequences of ITS in fasta format.
   -type TYPE  Type of its region: its1, its2, concatenate.
   -out OUT    Get output of your file.
 
