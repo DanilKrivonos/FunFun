@@ -11,7 +11,7 @@ FunFun (Fungal Functional predictor) is the tool allows us to evaluate the gene 
 ## **Installation:**
 FunFun can be installed via pip:
 ```
-conda create -n funfun_env -c bioconda
+conda create -n funfun_env
 conda activate funfun_env
 pip install funfun
 ```
