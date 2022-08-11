@@ -29,7 +29,7 @@ the ε value. However, in this case, it should be taken into account that an inc
 ```
 funfun -ITS example/its2.fasta -type its2
 ```
-In the result of FunFun you take comfortable bar plot:
+In the result of FunFun you take comfortable bar plot in html format:
 
 <img src="https://user-images.githubusercontent.com/53526550/177324645-b297fc42-a774-4883-9cbf-8810cccea0a7.png" width="1000" height="600" align="left">
 
