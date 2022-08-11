@@ -1,6 +1,6 @@
-# FunFun: ITS based gene content predictor tool
+# FunFun: ITS-based functional annotator of fungal communities
 <img src="https://user-images.githubusercontent.com/53526550/179017255-7efbfcb2-cee6-427a-9d43-0e2a570b2d45.png" width="200" height="280" align="left">
-FunFun (Fungal Functional predictor) is the tool allows us to evaluate the functional content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
+FunFun (Fungal Functional predictor) is the tool allows us to evaluate the gene content of an individual fungus or mycobiome based on ITS-amplicon sequencing data. 
 
 ## **Dependencies:**
 - numpy
@@ -22,7 +22,9 @@ python funfun --help
 ```
 ## **Ussages example:**
 
-FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Full size ITS cluster). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is KEGG orthology group and subsequent correspond to predicted gene content vectors.
+FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Concatenate). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is KEGG orthology group and subsequent correspond to predicted gene content vectors. The resulting file may be empty. This means that the target fungi has no neighbors in the given ε neighborhood. In order to get a prediction, you need to increase 
+the ε value. However, in this case, it should be taken into account that an increase in the search area for compounds reduces the accuracy of the received answer. We consider 0.5 to be the default value for ε.
+
 
 ```
 funfun -ITS example/its2.fasta -type its2
@@ -48,5 +50,7 @@ Algorithm Parameter:
   -e E        Epsilon distance for nearest neighbor. 0 <= ε <= 1. Default ε=0.5.
 ```
 ## Reference
-Will be add later ...
+FunFun: ITS-based functional annotator of fungal communities
+Danil V. Krivonos, Dmitry N. Konanov, Elena N. Ilina
+bioRxiv 2022.07.22.501143; doi: https://doi.org/10.1101/2022.07.22.501143
  
