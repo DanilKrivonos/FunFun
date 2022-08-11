@@ -15,11 +15,6 @@ conda create -n funfun_env
 conda activate funfun_env
 pip install funfun
 ```
-Or you can clone git repository:
-```
-git clone https://github.com/DanilKrivonos/FunFun
-python funfun --help
-```
 ## **Ussages example:**
 
 FunFun use three different types of ITS region input: ITS1, ITS2 and ITS1+5.8S+ITS2 (Concatenate). Also you can change model parameters: K neighbours and ε neighborhood limit (decreasing the parameters will increase the prediction accuracy). The output file is tsv tabl, when first column is KEGG orthology group and subsequent correspond to predicted gene content vectors. The resulting file may be empty. This means that the target fungi has no neighbors in the given ε neighborhood. In order to get a prediction, you need to increase 
