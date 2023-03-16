@@ -48,7 +48,5 @@ Algorithm Parameter:
   -e E        Epsilon distance for nearest neighbor. 0 <= ε <= 1. Default ε=0.5.
 ```
 ## Reference
-FunFun: ITS-based functional annotator of fungal communities
-Danil V. Krivonos, Dmitry N. Konanov, Elena N. Ilina
-bioRxiv 2022.07.22.501143; doi: https://doi.org/10.1101/2022.07.22.501143
+Krivonos, Danil V., Dmitry N. Konanov, and Elena N. Ilina. "FunFun: ITS‐based functional annotator of fungal communities." Ecology and Evolution 13.3 (2023): e9874.
  
