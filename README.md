@@ -25,7 +25,7 @@ the ε value. However, in this case, it should be taken into account that an inc
 When using concatenates for analysis, we recommend cutting off the remaining LSU and SSU, which may remain after PCR. We recommend doing this using TAx software.
 
 ```
-funfun -ITS example/its2.fasta -type its2
+funfun -its example/its2.fasta -type its2
 ```
 In the result of FunFun you take comfortable bar plot in html format:
 
@@ -33,13 +33,13 @@ In the result of FunFun you take comfortable bar plot in html format:
 
 ## Parameters
 ```
-usage: FunFun.py [-h] [-ITS ITS] [-type TYPE] [-out OUT] [-K K] [-e E]
+usage: FunFun.py [-h] [-its ITS] [-type TYPE] [-out OUT] [-K K] [-e E]
 
 optional arguments:
   -h, --help  show this help message and exit
 
 Base arguments:
-  -ITS ITS    Sequences of ITS in fasta format.
+  -its ITS    Sequences of ITS in fasta format.
   -type TYPE  Type of its region: its1, its2, concatenate.
   -out OUT   Output directory (default ./FunFun_output)
 
